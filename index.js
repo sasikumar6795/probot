@@ -1,22 +1,65 @@
 /**
  * This is the main entrypoint to your Probot app
  * @param {import('probot').Probot} app
+ * 
  */
+
 module.exports = (app) => {
   // Your code here
   app.log.info("Yay, the app was loaded!");
 
-  app.on("issues.opened", async (context) => {
-    app.log.info(context);
-    const issueComment = context.issue({
-      body: "Thanks for opening this issue!!",
+  app.on("pull_request.opened", async (context) => {
+    //app.log.info(context.payload);
+    const data = context.payload;
+    // const issueComment = context.payload({
+    //   body: "Thanks for raising the pull request"
+    // });
+    // return context.octokit.issues.createComment(issueComment);
+
+    // reading data from api 
+    
+    const cloneUrl =data.repository?.clone_url;
+    const source = data.pull_request.head.ref;
+    const destination = data.pull_request.base.ref;
+
+    const mockDataSending ={
+      'cloneUrl' : cloneUrl,
+      'source' : source,
+      'destination': destination
+    }
+
+    let stringifiedData = JSON.stringify(mockDataSending);
+  
+    const spawn = require('child_process').exec;
+    //const pythonPath="C:\\Users\\sasik\\AppData\\Local\\Programs\\Python\\Python310"; 
+
+    const process = spawn('python', ['reviewer.py',stringifiedData]);
+
+    var result = '';
+    app.log.info("result", result);  
+    process.stdout.on('data', function (stdData) {
+      app.log.info("stdData",stdData);
+      result += stdData.toString();
     });
-    return context.octokit.issues.createComment(issueComment);
-  });
+    //let resultData = JSON.parse(result);
+    app.log.info("result", result);
+    const resultData='';
+    process.stderr.on('end', function () {
+  
+      // Parse the string as JSON when stdout
+      // data stream ends
+      resultData = JSON.parse(result);
+    });
+    app.log.info("resultData ", resultData);
+    // const assignee =  context.issue({
+    //   assigness: ["sasikumar6795","Arunrajg"]
+    // })
 
-  // For more information on building apps:
-  // https://probot.github.io/docs/
+    // context.octokit.pull_request.addAssignees(assignee);
 
-  // To get your app running against GitHub, see:
-  // https://probot.github.io/docs/development/
-};
+    //   return context.octokit.issues.createComment(issueComment);;
+  // });
+
+    return context.octokit.pull_request;
+  
+})};
