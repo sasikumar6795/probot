@@ -16,7 +16,8 @@ def get_reviewers(datainput):
     """
     print(datainput)
     # return json.dumps(["ReshmaManoharan"])
-    print(["ReshmaManoharan", "sasikumar6795"])
+    #print(["Arunrajg"])
+    sys.stdout.write("{}".format(["Arunrajg"]))
     #return ["ReshmaManoharan", "sasikumar6795"]
 
-get_reviewers(sys.argv[1])
+get_reviewers(str(sys.argv[1]))
